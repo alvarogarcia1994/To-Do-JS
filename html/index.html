@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>To-Do List</title>
+        <link rel="stylesheet" href="../css/styles.css">
+    </head>
+
+    <body>
+        
+        <div class="container">
+            <div class="caja">
+                <div class="To-Do_List">
+                     
+                    <div class="titulo">
+                        <h2>Lista de tareas</h2>
+                    </div>
+                     
+                    <div class="fila">
+                        <input type="text" id="input-caja" placeholder="Añade nombre de la tarea">
+                        <button onclick="agregarTarea()" >Añadir tarea</button>
+                        <span id="text-error" class="error"></span>
+                    </div>
+
+                    <div class="fila">
+                        <ul id="lista-container" class="scroll">
+                        
+                        </ul>
+                    </div>
+
+                    <div class="fila">
+                        <textarea id="contenido" cols="70" rows="10"></textarea>
+                    </div>
+                    
+                    <div class="fila saveAndImportButtons">
+                        <button id="save" onclick="guardarDatosEnJSON()">Guardar datos en fichero JSON</button>
+                        <button id="import" onclick="importaFicheroJSON()">Importar fichero JSON</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+       
+        <script>
+            var bd = []; // base de datos con las tareas
+            var taskId = 0; // Id de la tarea
+
+            //Bloque de variables
+            var inputCaja = document.querySelector("#input-caja");
+            var listaContainer = document.querySelector("#lista-container");
+            var error = document.querySelector("#text-error");
+
+            //Función que se encargará de guardar la información en un fichero JSON
+            function guardarDatosEnJSON(){
+                document.querySelector("#save").addEventListener("click", async () =>{
+                    var salvaGuardar;
+                    try {
+                        salvaGuardar = await window.showSaveFilePicker({ 
+                            types: [{
+                                description: "JSON", 
+                                accept: { "application/json": [".json"]},
+                            }]
+                        });
+                    } catch(error) {
+                        console.log("No se ha podido guardar la información en el fichero. " + error);
+                        return;
+                    }
+
+                    try {
+                        //Obtenemos el contenido
+                        var contenido = new Blob([JSON.stringify(bd, null, 2)],{type: 'application/json'});
+                        //Guardamos el fichero
+                        var fichero = await salvaGuardar.createWritable();
+                        await fichero.write(contenido);
+                        await fichero.close();
+                    } catch(error){
+                        alert("Error al guardar el archivo. " + error)
+                    }
+                })
+            }
+
+            //Función que se encargará de importar el fichero JSON
+            function importaFicheroJSON(){
+                document.querySelector("#import").addEventListener("click", async () =>{
+                    try{
+                        var referencias = await window.showOpenFilePicker({});
+
+                        var fichero = await referencias[0].getFile();
+
+                        var contenido = await fichero.text();
+
+                        document.querySelector("#contenido").value = contenido;
+
+                    } catch(error){
+                        console.log("Se ha producido un error o bien no se ha podido cargar el fichero. " + error)
+                    }
+                })
+            }
+            
+            //Función que se encargará de cargar la información
+            function cargarDatos(){
+                var datosGuardados = localStorage.getItem("data");
+                bd = datosGuardados ? JSON.parse(datosGuardados) : [];
+                if (bd.length > 0) {
+                    taskId = Math.max(...bd.map(task => task.id));
+                } else {
+                    taskId = 0;
+                }
+                actualizarListaEnPantalla();
+            }                
+
+            //Función que guarda los datos
+            function guardarDatos(){
+                localStorage.setItem("data", JSON.stringify(bd));
+            }
+
+            //Función que se encarga de actualizar el contenido de la lista
+            function actualizarListaEnPantalla() {
+                listaContainer.innerHTML = '';
+                //Recursión del array bd
+                for (var i=0;i<bd.length;i++) {
+                    var li = document.createElement('li');
+                    li.innerHTML = bd[i].id + " - " + bd[i].nombre;
+                    li.setAttribute("data-indice", i);
+                    //Evento de click
+                    li.addEventListener("click", function(){
+                        let indice = parseInt(this.getAttribute("data-indice"));
+                        bd[indice].hecha = !bd[indice].hecha;
+                        guardarDatos();
+                        actualizarListaEnPantalla();
+                    });
+                    if (bd[i].hecha) {
+                        li.classList.add("checked");
+                    }
+
+                    var img = document.createElement('img');
+                    img.src = "../imagenes/notcheck.png";
+                    
+                    img.classList.add("cerrar");
+                    img.addEventListener("click", function(){
+                        let indice = parseInt(this.parentElement.getAttribute("data-indice"));
+                        bd.splice(indice, 1);
+                        guardarDatos();
+                        actualizarListaEnPantalla();
+                        if (bd.length === 0) {
+                            taskId = 0; // Reseteamos el valor de taskId cuando la lista esté vacía
+                        }
+                    });
+                    li.appendChild(img);                    
+
+                    listaContainer.appendChild(li);
+                }
+            }
+
+            //Función para agregar tareas
+            function agregarTarea(){
+                
+                //Si el valor del campo de texto está vacío, forzamos al usuario a escribir algo
+                if (inputCaja.value.trim() === ""){
+                    error.innerHTML = "Este campo es obligatorio"
+                    //Si por el contrario el usuario ha definido el nombre de una tarea
+                } else{
+                    error.innerHTML = "";
+
+                    // Añadimos la tarea a la base de datos
+                    bd.push({
+                        id: ++taskId,
+                        nombre : inputCaja.value,
+                        hecha : false,
+                    });
+
+                    //Vaciamos el campo de texto
+                    inputCaja.value = "";
+
+                    //Invocamos a los métodos guardarDatos() y actualizarListaEnPantalla()
+                    guardarDatos();
+                    actualizarListaEnPantalla();
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", function(){
+                cargarDatos();
+                guardarDatosEnJSON();
+                importaFicheroJSON();
+       
+                //Utilización de API localStorage
+                function storageAvailable(type) {
+                    let storage;
+
+                    try {
+                        storage = window[type];
+                        const x = "__storage_test__";
+                        storage.setItem(x, x);
+                        storage.removeItem(x);
+                        return true;
+                    } catch (e) {
+                        return (
+                        e instanceof DOMException &&
+                        e.name === "QuotaExceededError" &&
+                        // Acknowledge QuotaExceededError only if there's something already stored
+                        storage &&
+                        storage.length !== 0
+                        );
+                    }
+                }
+                
+                // Llamada a la función storageAvailable
+                if (storageAvailable("localStorage")){
+                    alert("Estás de suerte, puedes utilizar localStorage");
+                } else{
+                    alert("No se puede utilizar el localStorage");
+                }
+                
+            });
+
+        </script>         
+    </body>
+</html>

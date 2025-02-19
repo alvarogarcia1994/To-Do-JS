@@ -1,0 +1,189 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+.container{
+    width: 100%;
+    min-height: 100vh;
+    background-color: blueviolet;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.caja{
+    max-width: 440px;
+    width: 100%;
+}
+
+.todo-app{
+    background-color: #fff;
+    width: 100%;
+    padding: 20px 20px;
+    margin-top: 40px;
+    border-radius: 10px;
+    width: 440px;
+    height: 80vh;
+}
+
+.titulo{
+    height: 10%;
+    display: flex;
+    align-items: center;
+}
+
+.titulo img{
+    width: 30px;
+    margin-left: 10px;
+}
+
+.fila{
+    height: 10%;
+    display: flex;
+    width: 100%;
+    padding-top: 7px;
+    margin-top: 30px;
+}
+
+
+#input-caja{
+    flex:1;
+    height: 30px;
+    padding: 0 10px;
+}
+
+button{
+    border: none;
+    outline: none;
+    background-color: #00c04b;
+    padding: 0 10px;
+    margin-left: 3px;
+    color: #fff;
+    cursor: pointer;
+    height: 30px;
+}
+
+.saveAndImportButtons{
+    gap: 40px;
+}
+
+#save{
+    border: none;
+    outline: none;
+    background-color: darkred;
+    padding: 0 10px;
+    margin-left: 3px;
+    color: #fff;
+    cursor: pointer;
+    height: 30px;
+}
+
+#import{
+    border: none;
+    outline: none;
+    background-color: blue;
+    padding: 0 10px;
+    margin-left: 3px;
+    color: #fff;
+    cursor: pointer;
+    height: 30px;
+}
+
+h2{
+    color: white;
+}
+
+button:hover{
+    background-color: #008631;
+}
+
+.scroll{
+    height: 80%;
+    width: 100%;
+    overflow-y: scroll;
+    scrollbar-color: rgb(255, 0, 0) rgb(224, 224, 224);
+}
+
+ul li{
+    color: #fff;
+    position: relative;
+    list-style: none;
+    padding: 7px 5px;
+    padding-left: 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+ul li::before{
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid #000;
+    left: 5px;
+}
+
+ul li.checked{
+    color: white;
+    text-decoration: line-through;
+}
+
+ul .checked::before{
+    background-image: url('../imagenes/check.png');
+    border: none;
+}
+
+ul li:hover{
+    background-color: grey;
+    border-radius: 30px;
+}
+
+.cerrar{
+    height: 18px;
+    width: 18px;
+    cursor: pointer;
+    margin-left: 7px;
+    margin-right: 10px;
+}
+
+.data{
+    width: 440px;
+    position: relative;
+}
+
+/* Media queries para dispositivos móviles */
+@media screen and (max-width:489px) {
+
+    .container{
+        width: 100%;
+        height: 100vh;
+    }
+
+    .caja{
+        max-width: 340px;
+        width: 100%;
+    }
+    
+    .To-Do_List{
+        width: 340px;
+    }
+
+    #save{
+        height: auto;
+    }
+
+    #import{
+        height: auto;
+    }
+
+}
